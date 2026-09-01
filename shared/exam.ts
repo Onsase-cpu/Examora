@@ -1,0 +1,10 @@
+export type Question = { id: string; prompt: string; marks: number; topic: string; type: "MCQ" | "Short answer" | "Essay" };
+export type Exam = { id: string; code: string; title: string; subject: string; date: string; duration: string; status: "Draft" | "Published" | "Completed"; questions: Question[]; candidateCount: number; room: string };
+export type Candidate = { id: string; name: string; index: string; programme: string; examId: string; score?: number; grade?: string };
+export type Room = { id: string; name: string; capacity: number; assigned: number; building: string };
+export type Result = { candidateId: string; examId: string; score: number; maximum: number; percentage: number; grade: string; remark: string };
+export type Transcript = { candidateId: string; candidateName: string; programme: string; records: Result[]; issuedAt?: string };
+export type GradeResult = { score: number; grade: string; remark: string; percentage: number };
+export const gradeScore = (score: number, max: number): GradeResult => { const percentage = max ? Math.round((score / max) * 100) : 0; const grade = percentage >= 80 ? "A" : percentage >= 70 ? "B" : percentage >= 60 ? "C" : percentage >= 50 ? "D" : "F"; const remark = grade === "A" ? "Distinction" : grade === "B" ? "Very good" : grade === "C" ? "Good" : grade === "D" ? "Pass" : "Needs review"; return { score, grade, remark, percentage }; };
+export const roomUtilisation = (rooms: Room[]) => Math.round((rooms.reduce((sum, room) => sum + room.assigned, 0) / Math.max(1, rooms.reduce((sum, room) => sum + room.capacity, 0))) * 100);
+export const transcriptLine = (candidate: Candidate, exam: Exam): Result => { const maximum = exam.questions.reduce((sum, q) => sum + q.marks, 0); const graded = gradeScore(candidate.score ?? 0, maximum); return { candidateId: candidate.id, examId: exam.id, score: graded.score, maximum, percentage: graded.percentage, grade: candidate.grade ?? graded.grade, remark: graded.remark }; };
